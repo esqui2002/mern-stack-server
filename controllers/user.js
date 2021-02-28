@@ -147,10 +147,15 @@ function getAvatar(req, res) {
 	});
 }
 
-function updateUser(req, res) {
+async function updateUser(req, res) {
 	let userData = req.body;
 	userData.email = req.body.email.toLowerCase();
 	const params = req.params;
+
+	if (userData.password) {
+		const hash = await bcrypt.hashSync(userData.password);
+		userData.password = hash;
+	}
 
 	User.findByIdAndUpdate({ _id: params.id }, userData, (err, userUpdate) => {
 		if (err) res.status(500).send({ message: 'Error del servidor' });
@@ -163,6 +168,22 @@ function updateUser(req, res) {
 	});
 }
 
+function activateUser(req, res) {
+	const { id } = req.params;
+	const { active } = req.body;
+
+	User.findByIdAndUpdate(id, { active }, (err, userStored) => {
+		if (err) res.status(500).send({ message: 'Error del servidor' });
+		if (!userStored) res.status(404).send({ message: 'Usuario no encontrado' });
+
+		if (active === true) {
+			res.status(200).send({ message: 'Usuario activa correctamente' });
+		} else {
+			res.status(200).send({ message: 'Usuario desactivado correctamente' });
+		}
+	});
+}
+
 module.exports = {
 	signUp,
 	signIn,
@@ -171,4 +192,5 @@ module.exports = {
 	uploadAvatar,
 	getAvatar,
 	updateUser,
+	activateUser,
 };
