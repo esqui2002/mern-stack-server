@@ -184,6 +184,47 @@ function activateUser(req, res) {
 	});
 }
 
+function deleteUser(req, res) {
+	const { id } = req.params;
+
+	User.findByIdAndRemove(id, (err, userDeleted) => {
+		if (err) res.status(500).send({ message: 'Error del servidor' });
+		if (!userDeleted) {
+			res.status(404).send({ message: 'Usuario no encontrado' });
+		} else {
+			res.status(200).send({ message: 'Usuario eliminado correctamente' });
+		}
+	});
+}
+
+async function signUpAdmin(req, res) {
+	const user = new User();
+
+	const { name, lastname, email, role, password } = req.body;
+
+	if (!password) {
+		res.status(422).send({ message: 'La contraseña es obligatoria' });
+	}
+
+	user.name = name;
+	user.lastname = lastname;
+	user.email = email.toLowerCase();
+	user.role = role;
+	user.active = true;
+
+	const hash = await bcrypt.hashSync(password);
+	user.password = hash;
+
+	user.save((err, userStored) => {
+		if (err) res.status(500).send({ message: 'El usuario ya existe' });
+		if (!userStored) {
+			res.status(500).send({ message: 'Error al crear el usuario' });
+		} else {
+			res.status(200).send({ message: 'Usuario creado correctamente' });
+		}
+	});
+}
+
 module.exports = {
 	signUp,
 	signIn,
@@ -193,4 +234,6 @@ module.exports = {
 	getAvatar,
 	updateUser,
 	activateUser,
+	deleteUser,
+	signUpAdmin,
 };
