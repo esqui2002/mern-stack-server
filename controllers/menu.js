@@ -39,7 +39,7 @@ function updateMenu(req, res) {
 	Menu.findByIdAndUpdate(params.id, menuData, (err, menuUpdated) => {
 		if (err) res.status(500).send({ message: 'Error del servidor' });
 		if (!menuUpdated) {
-			res.status(404).message({ message: 'No se ha encontrado ningun menu' });
+			res.status(404).send({ message: 'No se ha encontrado ningun menu' });
 		} else {
 			res.status(200).send({ message: 'Menu actualizado correctamente' });
 		}
@@ -63,9 +63,25 @@ function activateMenu(req, res) {
 		}
 	});
 }
+
+function deleteMenu(req, res) {
+	const { id } = req.params;
+
+	Menu.findByIdAndRemove(id, (err, menuDeleted) => {
+		if (err) res.status(500).send({ message: 'Error del servidor' });
+		if (!menuDeleted) {
+			res.status(404).send({ message: 'Menu no encontrado' });
+		} else {
+			res
+				.status(200)
+				.send({ message: 'El menu ha sido eliminado correctamente' });
+		}
+	});
+}
 module.exports = {
 	addMenu,
 	getMenus,
 	updateMenu,
 	activateMenu,
+	deleteMenu,
 };
